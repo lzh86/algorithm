@@ -1,5 +1,8 @@
 package com.lzh.array;
 
+/**
+ * 静态数组
+ */
 public class Array {
     //数组
     private int[] data;

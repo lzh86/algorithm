@@ -2,6 +2,10 @@ package com.lzh.array;
 
 import java.util.Arrays;
 
+/**
+ * 动态数组
+ * @param <T>
+ */
 public class GenericArray<T> {
     private T[] data;
     //数组总容量
@@ -40,9 +44,9 @@ public class GenericArray<T> {
     }
 
     // 获取对应 index 位置的元素
-    public T get(int index) {
+    public <T> T get(int index) {
         checkIndex(index);
-        return data[index];
+        return (T) data[index];
     }
 
     // 查看数组是否包含元素e
