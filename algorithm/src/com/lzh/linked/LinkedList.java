@@ -12,12 +12,18 @@ public class LinkedList<T> {
         T item;
         Node<T> next;
         Node<T> prev;
-
+        //构造双链表
         Node(Node<T> prev, T element, Node<T> next) {
             this.item = element;
             this.next = next;
             this.prev = prev;
         }
+        //构造单链表
+        Node(T element, Node<T> next) {
+            this.item = element;
+            this.next = next;
+        }
+
     }
 
     //头节点
@@ -33,6 +39,8 @@ public class LinkedList<T> {
 
     public LinkedList() {
     }
+
+    //###################################################### 双向链表 #####################################################
 
     /**
      * 头插
@@ -56,6 +64,7 @@ public class LinkedList<T> {
      * @param element 元素
      */
     public void addLast(T element) {
+        //todo 存在没有将节点关联
         LinkedList.Node<T> newNode = new LinkedList.Node<>(null, element, null);
         if (first == null)
             first = newNode;
@@ -102,6 +111,112 @@ public class LinkedList<T> {
     }
 
     /**
+     * 根据线标删除节点
+     * @param index     删除节点下标
+     */
+    // TODO: 2021/2/2 没考虑 first 和 last 节点更新情况 没考虑被卸载节点的回收问题
+    void remove(int index){
+        if(index < 0 || index > size) return;
+        //删除节点
+        Node<T> node = node(index);
+
+        Node<T> prev = node.prev;
+        Node<T> next = node.next;
+
+        prev.next = next;
+        next.prev = prev;
+        size--;
+    }
+
+    /**
+     * 删除头节点
+     */
+    // TODO: 2021/2/2 没有考虑两个节点的情况
+    void removeFirst(){
+        if (size < 0) return;
+        //下节点
+        Node<T> next = first.next;
+        first.next = null;
+        first = next;
+        first.prev = null;
+        size--;
+    }
+
+    /**
+     * 删除尾节点
+     */
+    void removeLast(){
+        if (size < 0) return;
+        //下节点
+        Node<T> prev = last.prev;
+        last.prev = null;
+        last = prev;
+        last.next = null;
+        size--;
+    }
+
+    private T unlinkFirst(LinkedList.Node<T> f) {
+        // assert f == first && f != null;
+        final T element = f.item;
+        final LinkedList.Node<T> next = f.next;
+        f.item = null;
+        f.next = null; // help GC
+        first = next;
+        if (next == null)
+            last = null;
+        else
+            next.prev = null;
+        size--;
+        return element;
+    }
+
+    /**
+     * Unlinks non-null last node l.
+     */
+    private T unlinkLast(LinkedList.Node<T> l) {
+        // assert l == last && l != null;
+        final T element = l.item;
+        final LinkedList.Node<T> prev = l.prev;
+        l.item = null;
+        l.prev = null; // help GC
+        last = prev;
+        if (prev == null)
+            first = null;
+        else
+            prev.next = null;
+        size--;
+        return element;
+    }
+
+
+    /**
+     * 删除节点
+     * @param x
+     */
+    void unlink(LinkedList.Node<T> x) {
+        // assert x != null;
+        final LinkedList.Node<T> next = x.next;
+        final LinkedList.Node<T> prev = x.prev;
+
+        if (prev == null) {
+            first = next;
+        } else {
+            prev.next = next;
+            x.prev = null;
+        }
+
+        if (next == null) {
+            last = prev;
+        } else {
+            next.prev = prev;
+            x.next = null;
+        }
+
+        x.item = null;
+        size--;
+    }
+
+    /**
      * 查找指定下标节点
      *
      * @param index 指定下标
@@ -140,6 +255,7 @@ public class LinkedList<T> {
             linkBefore(element, node(index));
     }
 
+    //###################################################### 单向链表 #####################################################
 
     public Object[] toArray() {
         Object[] result = new Object[size];
@@ -149,24 +265,126 @@ public class LinkedList<T> {
         return result;
     }
 
+    /**
+     * 单链表头插
+     *
+     * @param element 元素
+     */
+    public void addSingleFirst(T element) {
+        LinkedList.Node<T> f = first;
+        LinkedList.Node<T> newNode = new LinkedList.Node<>(element, f);
+        if (f == null) {
+            first = newNode;
+            last = first;
+        } else {
+            first = newNode;
+        }
+        size++;
+    }
+
+    /**
+     * 单链表尾插
+     *
+     * @param element 元素
+     */
+    public void addSingleLast(T element) {
+        LinkedList.Node<T> f = first;
+        LinkedList.Node<T> newNode = new LinkedList.Node<>(element, null);
+        if (f == null)
+            first = newNode;
+        else
+           last.next = newNode;
+        last = newNode;
+        size++;
+    }
+
+    /**
+     * 单链表指定位置插入
+     *
+     * @param element  元素
+     * @param index    插入下标当前节点
+     */
+    void addSingleBefore(T element,int index) {
+        // TODO: 感觉不是很优雅
+
+        //index = 0 需要更新头节点
+        if (index == 0) {
+            addSingleFirst(element);
+            return;
+        }
+
+        //index = size - 1 需要更新尾节点
+        if (index == (size - 1)) {
+            addSingleLast(element);
+            return;
+        }
+
+        Node<T> nextNode = sinleNode(index);
+        Node<T> preNode = sinleNode(index - 1);
+        Node<T> newNode = new LinkedList.Node<>(element, nextNode);
+        newNode.next = nextNode;
+        preNode.next = newNode;
+        size++;
+    }
+
+
+    /**
+     * 单查找指定下标节点
+     *
+     * @param index 指定下标
+     * @return
+     */
+    Node<T> sinleNode(int index) {
+        //if(index < 0 || index > size)  非法下标
+        //根据下标位置设置从前往后还是从后往前查找
+        if (index > size || index < 0)  return null;
+            Node<T> x = first;
+            for (int i = 0; i < index; i++)
+                x = x.next;
+            return x;
+    }
+
 
     public static void main(String[] args) {
-        LinkedList<String> headLinkedList = new LinkedList<>();
-        headLinkedList.addFirst("123");
-        headLinkedList.addFirst("1234");
-        headLinkedList.addFirst("1235");
+//        LinkedList<String> headLinkedList = new LinkedList<>();
+//        headLinkedList.addFirst("123");
+//        headLinkedList.addFirst("1234");
+//        headLinkedList.addFirst("1235");
+//
+//        headLinkedList.add(1, "fff");
+//        Object[] array = headLinkedList.toArray();
+//        System.out.println(Arrays.toString(array));
 
-        headLinkedList.add(1, "fff");
-        Object[] array = headLinkedList.toArray();
-        System.out.println(Arrays.toString(array));
 
+//        LinkedList<String> lastLinkedList = new LinkedList<>();
+//        lastLinkedList.linkLast("1");
+//        lastLinkedList.linkLast("2");
+//        lastLinkedList.linkLast("3");
+//        lastLinkedList.linkLast("4");
+//        Object[] array1 = lastLinkedList.toArray();
+//        System.out.println(Arrays.toString(array1));
+//        //lastLinkedList.remove(1);
+//        lastLinkedList.removeFirst();
+//        Object[] array2 = lastLinkedList.toArray();
+//        System.out.println(Arrays.toString(array2));
+//        lastLinkedList.removeLast();
+//        Object[] array3 = lastLinkedList.toArray();
+//        System.out.println(Arrays.toString(array3));
 
         LinkedList<String> lastLinkedList = new LinkedList<>();
-        lastLinkedList.addLast("123");
-        lastLinkedList.addLast("1234");
-        lastLinkedList.addLast("1235");
-        Object[] array1 = lastLinkedList.toArray();
-        System.out.println(Arrays.toString(array1));
+       lastLinkedList.addSingleLast("1");
+        System.out.println("头节点:" + lastLinkedList.first.item);
+        System.out.println("尾节点:" + lastLinkedList.last.item);
+        lastLinkedList.addSingleLast("2");
+//        lastLinkedList.addSingleLast("3");
+//        lastLinkedList.addSingleLast("4");
+        Object[] array3 = lastLinkedList.toArray();
+        System.out.println(Arrays.toString(array3));
+        lastLinkedList.addSingleBefore("5",1);
+        Object[] array4 = lastLinkedList.toArray();
+        System.out.println(Arrays.toString(array4));
+        System.out.println("头节点:" + lastLinkedList.first.item);
+        System.out.println("尾节点:" + lastLinkedList.last.item);
 
 
     }
