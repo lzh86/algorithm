@@ -1,6 +1,7 @@
-package com.lzh.linked;
+package com.lzh.array;
 
 import java.util.HashMap;
+import java.util.Scanner;
 
 /**
  * 基于数组实现LRU算法
@@ -43,43 +44,69 @@ public class LRUArray<T> {
         int index = findIndexElement(element);
         if (index == -1) {
             if (ifFull()) {
-                removeElementAndElement(element);
+                removeTailElement();
+                cache(element, 0);
             } else {
-                if (contain(element)) {
-                    //起始位置到元素节点位置元素后移 新增元素插入到头节点
-                    removeElement(element);
-                } else {
-                    //整体元素全部后移 新增元素插入到头节点
-                    removeElementAndElement(element);
-                    size++;
-                }
+                moveAfterElementByIndex(size);
+                cache(element, 0);
             }
-
+        } else {
+            moveAfterElement(element);
         }
     }
 
-    void removeElementAndElement(T element) {
-        for (int i = size - 1; i > 0; i++) {
+    /**
+     * 移除末尾元素
+     */
+    void removeTailElement() {
+        if (size == 0) return;
+        for (int i = size - 1; i > 0; i--) {
+            item[i] = item[i - 1];
+            map.put(item[i], i);
+        }
+        size--;
+    }
+
+    /**
+     * 根据下标移动元素
+     *
+     * @param index
+     */
+    void moveAfterElementByIndex(int index) {
+        if (index == 0) return;
+        for (int i = index; i > 0; i--) {
             item[i] = item[i - 1];
             map.put(item[i - 1], i);
         }
+    }
+
+    /**
+     * 根据元素移动
+     *
+     * @param element
+     */
+    void moveAfterElement(T element) {
+        Integer index = map.get(element);
+        if (index == 0) return;
+        for (int i = index; i > 0; i--) {
+            item[i] = item[i - 1];
+            map.put(item[i - 1], i);
+        }
+        size--;
         cache(element, 0);
     }
 
-
+    /**
+     * 缓存元素
+     *
+     * @param element
+     * @param index
+     */
     void cache(T element, int index) {
         item[index] = element;
         map.put(element, index);
+        size++;
     }
-
-    void removeElement(T element) {
-        Integer index = map.get(element);
-        for (int i = index; i > 0; i++) {
-            item[i] = item[i - 1];
-            map.put(item[i - 1], i);
-        }
-    }
-
 
     /**
      * 判断元素是否满
@@ -89,16 +116,6 @@ public class LRUArray<T> {
             return Boolean.TRUE;
         else
             return Boolean.FALSE;
-    }
-
-    /**
-     * 判断元素是否存在
-     *
-     * @param element
-     * @return
-     */
-    boolean contain(T element) {
-        return map.containsKey(element);
     }
 
     /**
@@ -115,20 +132,27 @@ public class LRUArray<T> {
         return index;
     }
 
-    void printAll(){
-        for(int i = 0;i < size;i++){
+    /**
+     * 打印元素
+     */
+    void printAll() {
+        for (int i = 0; i < size; i++) {
             System.out.print(item[i] + ",");
         }
+        System.out.println();
     }
 
 
     public static void main(String[] args) {
         LRUArray<String> lruArray = new LRUArray<>(5);
-        lruArray.add("1");
-        lruArray.add("2");
-        lruArray.add("3");
-        lruArray.add("4");
-        lruArray.printAll();
+        Scanner sc = new Scanner(System.in);
+        while (true) {
+            lruArray.add(sc.next());
+            // System.out.println(Arrays.toString(list.toArray()));
+            lruArray.printAll();
+
+        }
+
     }
 
 
