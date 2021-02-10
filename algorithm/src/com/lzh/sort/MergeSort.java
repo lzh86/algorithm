@@ -22,21 +22,32 @@ public class MergeSort {
         int k = 0;
         // 把较小的数先移到新数组中
         while (i <= mid && j <= high) {
-            if (a[i] < a[j]) {
+            if (a[i] <= a[j]) {   //可以自己控制排序算法是否稳定
                 temp[k++] = a[i++];
             } else {
                 temp[k++] = a[j++];
             }
         }
 
-        // 把左边剩余的数移入数组
-        while(i<=mid){
-            temp[k++] = a[i++];
+        int start = i;
+        int end = mid;
+        if (i > mid) {
+            start = j;
+            end = high;
         }
-        // 把右边边剩余的数移入数组
-        while(j<=high){
-            temp[k++] = a[j++];
+
+        while (start <= end) {
+            temp[k++] = a[start++];
         }
+
+//        // 把左边剩余的数移入数组
+//        while(i<=mid){
+//            temp[k++] = a[i++];
+//        }
+//        // 把右边边剩余的数移入数组
+//        while(j<=high){
+//            temp[k++] = a[j++];
+//        }
         // 把新数组中的数覆盖nums数组
         for (int x = 0; x < temp.length; x++) {
             a[x + low] = temp[x];
